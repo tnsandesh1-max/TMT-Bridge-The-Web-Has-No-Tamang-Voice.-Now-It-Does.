@@ -6,6 +6,30 @@
 
 ---
 
+## Screenshots
+
+### Hover-to-translate tooltip
+Select any text on any webpage and get an instant Nepali translation inline — no copy-pasting.
+
+![Hover-to-translate tooltip](screenshots/hover-tooltip.png)
+
+### Popup — Translate tab
+Type or paste text, choose language direction, and hit Translate. TTS readback is one click away.
+
+![Popup translate tab](screenshots/popup-translate.png)
+
+### Popup — Research tab
+Tracks total translations, successes, error reports, and average confidence score. Export everything as JSON.
+
+![Research tab](screenshots/research-tab.png)
+
+### Popup — Settings tab
+Enter your TMT API key, check TTS server status, and configure default languages and features.
+
+![Settings tab](screenshots/settings-tab.png)
+
+---
+
 ## Why this exists
 
 Tamang is spoken by over 1.5 million people in Nepal, but almost no web content exists in Tamang — and most Tamang speakers are more comfortable hearing their language than reading it. TMT Bridge brings the TMT translation API directly into the browser: select any text on any webpage and get an instant translation with audio readback, no copy-pasting required.
@@ -29,6 +53,13 @@ Beyond usability, every translation is logged locally and every user-reported er
 | 🖱️ | **Context menu** | Right-click any selection → "Translate with TMT Bridge" |
 
 ---
+
+## Getting Started
+
+1. Install the extension
+2. Open the popup → go to **Settings**
+3. Enter your TMT API key (`team_xxxxxxxxxxxxxxxx`)
+4. Start translating
 
 ## Installation
 
@@ -59,8 +90,6 @@ team_xxxxxxxxxxxxxxxx
 ```
 
 The key is stored in `chrome.storage.sync` — it stays on your device and is never sent anywhere except the TMT API.
-
-> **Do not hardcode your key in any source file.** If you're running a fork, always use the Settings tab to enter your key.
 
 ### 2. (Optional) Start the TTS server for best Nepali voice quality
 
@@ -176,6 +205,11 @@ tmt-extension/
 │   ├── icon16.png
 │   ├── icon48.png
 │   └── icon128.png
+├── screenshots/
+│   ├── hover-tooltip.png
+│   ├── popup-translate.png
+│   ├── research-tab.png
+│   └── settings-tab.png
 └── tts_server/
     ├── tts_server.py       # Local TTS server (Google ne-NP → ElevenLabs → gTTS)
     ├── requirements.txt    # Python dependencies
@@ -202,6 +236,6 @@ tmt-extension/
 - No user data is sent to any third party beyond the TMT API and your configured TTS provider
 - See `.gitignore` — the `.env` file is excluded from version control
 
-
+---
 
 *TMT Bridge — connecting Nepal's languages to the open web.*
