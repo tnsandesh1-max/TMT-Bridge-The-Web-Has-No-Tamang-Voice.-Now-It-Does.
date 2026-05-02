@@ -1,0 +1,225 @@
+/* TMT Bridge — Content Styles */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500&display=swap');
+
+#tmt-tooltip {
+  position: absolute;
+  z-index: 2147483647;
+  display: none;
+  width: 300px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.18));
+  pointer-events: all;
+}
+
+.tmt-tooltip-inner {
+  background: #1a1a2e;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.tmt-tooltip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.tmt-lang-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a78bfa;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tmt-tooltip-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.tmt-btn-icon {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.45);
+  cursor: pointer;
+  padding: 4px 5px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  transition: background 0.15s, color 0.15s;
+}
+.tmt-btn-icon:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.tmt-tooltip-body {
+  padding: 12px 14px 8px;
+}
+
+.tmt-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,0.5);
+  font-size: 12px;
+}
+
+.tmt-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(167,139,250,0.25);
+  border-top-color: #a78bfa;
+  border-radius: 50%;
+  animation: tmt-spin 0.7s linear infinite;
+}
+@keyframes tmt-spin { to { transform: rotate(360deg); } }
+
+.tmt-translation {
+  color: #f1f5f9;
+  font-size: 14px;
+  line-height: 1.65;
+  font-family: 'Noto Sans Devanagari', 'Segoe UI', sans-serif;
+  word-break: break-word;
+}
+
+.tmt-confidence {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.tmt-conf-label {
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.tmt-conf-bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.tmt-conf-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+.tmt-conf-pct {
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  min-width: 28px;
+  text-align: right;
+}
+
+/* Error report panel */
+.tmt-error-panel {
+  padding: 10px 14px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  background: rgba(239,68,68,0.06);
+}
+.tmt-error-panel p {
+  color: rgba(255,255,255,0.65);
+  font-size: 11px;
+  margin: 0 0 8px;
+}
+.tmt-error-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+.tmt-err-type {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.65);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tmt-err-type:hover { background: rgba(255,255,255,0.13); color: #fff; }
+.tmt-err-type.selected {
+  background: rgba(239,68,68,0.25);
+  border-color: rgba(239,68,68,0.5);
+  color: #fca5a5;
+}
+#tmt-error-note {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  color: #f1f5f9;
+  font-size: 11px;
+  padding: 5px 8px;
+  resize: none;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+#tmt-error-note:focus { outline: none; border-color: rgba(167,139,250,0.5); }
+
+.tmt-submit-report {
+  background: rgba(239,68,68,0.2);
+  border: 1px solid rgba(239,68,68,0.35);
+  color: #fca5a5;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tmt-submit-report:hover { background: rgba(239,68,68,0.35); }
+.tmt-cancel-report {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.45);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.tmt-cancel-report:hover { background: rgba(255,255,255,0.07); color: #fff; }
+
+/* Footer */
+.tmt-footer {
+  padding: 5px 14px 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+.tmt-powered {
+  font-size: 9px;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Bilingual mode styles ────────────────────────────────────────────────── */
+.tmt-bilingual-wrap {
+  display: inline;
+}
+.tmt-original {
+  display: inline;
+}
+.tmt-translated {
+  display: inline-block;
+  font-size: 0.82em;
+  color: #6d4fc2;
+  background: rgba(109,79,194,0.08);
+  border-radius: 3px;
+  padding: 0 3px;
+  margin-left: 3px;
+  font-family: 'Noto Sans Devanagari', sans-serif;
+  line-height: 1.5;
+  vertical-align: baseline;
+  border-bottom: 1px dashed rgba(109,79,194,0.35);
+}
