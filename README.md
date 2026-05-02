@@ -11,22 +11,22 @@
 ### Hover-to-translate tooltip
 Select any text on any webpage and get an instant Nepali translation inline — no copy-pasting.
 
-![Hover-to-translate tooltip](screenshots/hover-tooltip.png)
+![Hover-to-translate tooltip](screenshots\Screenshot 2026-05-02 163313.png)
 
 ### Popup — Translate tab
 Type or paste text, choose language direction, and hit Translate. TTS readback is one click away.
 
-![Popup translate tab](screenshots/popup-translate.png)
+![Popup translate tab](screenshots\Screenshot 2026-05-02 163333.png)
 
 ### Popup — Research tab
 Tracks total translations, successes, error reports, and average confidence score. Export everything as JSON.
 
-![Research tab](screenshots/research-tab.png)
+![Research tab](screenshots\Screenshot 2026-05-02 163356.png)
 
 ### Popup — Settings tab
 Enter your TMT API key, check TTS server status, and configure default languages and features.
 
-![Settings tab](screenshots/settings-tab.png)
+![Settings tab](screenshots\Screenshot 2026-05-02 163424.png)
 
 ---
 
