@@ -1,0 +1,36 @@
+# Secrets — never commit these
+.env
+.env.local
+*.env
+tts_server/.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.venv/
+*.egg-info/
+
+# Node / npm (if you ever add build tools)
+node_modules/
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Build artifacts
+dist/
+build/
+
+# Test data / exported datasets (optional — research data can be large)
+*.export.json
