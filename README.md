@@ -5,6 +5,13 @@
 **Built for the Google TMT Hackathon 2026** · Chrome Extension · Manifest V3
 
 ---
+## Why this exists
+
+Tamang is spoken by over 1.5 million people in Nepal, but almost no web content exists in Tamang — and most Tamang speakers are more comfortable hearing their language than reading it. TMT Bridge brings the TMT translation API directly into the browser: select any text on any webpage and get an instant translation with audio readback, no copy-pasting required.
+
+Beyond usability, every translation is logged locally and every user-reported error is classified by type — building a structured dataset for low-resource machine translation research.
+
+---
 
 ## Screenshots
 
@@ -27,14 +34,6 @@ Tracks total translations, successes, error reports, and average confidence scor
 Enter your TMT API key, check TTS server status, and configure default languages and features.
 
 ![Settings tab](screenshots/settings-tab.png)
-
----
-
-## Why this exists
-
-Tamang is spoken by over 1.5 million people in Nepal, but almost no web content exists in Tamang — and most Tamang speakers are more comfortable hearing their language than reading it. TMT Bridge brings the TMT translation API directly into the browser: select any text on any webpage and get an instant translation with audio readback, no copy-pasting required.
-
-Beyond usability, every translation is logged locally and every user-reported error is classified by type — building a structured dataset for low-resource machine translation research.
 
 ---
 
