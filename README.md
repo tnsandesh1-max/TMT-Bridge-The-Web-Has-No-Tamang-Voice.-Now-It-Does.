@@ -153,11 +153,6 @@ The server works fine with no keys at all — it falls through to gTTS automatic
 2. Type or paste text in the input box
 3. Press **Translate** or `Ctrl+Enter`
 
-### Full-page bilingual mode
-1. Click the TMT Bridge icon
-2. Toggle **Translate Full Page**
-3. Every paragraph on the page shows original + translation inline
-
 ### Right-click menu
 Select any text → right-click → **Translate with TMT Bridge**
 
