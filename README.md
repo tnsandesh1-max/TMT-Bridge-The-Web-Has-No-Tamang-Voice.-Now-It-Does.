@@ -2,7 +2,7 @@
 
 > Real-time translation across all 6 language directions, built for the web — with TTS readback, confidence scoring, and a research-grade error dataset.
 
-**Built for the Google TMT Hackathon 2026** · Chrome Extension · Manifest V3
+**Built for the Google TMT Hackathon 2026** · Chrome Extension · Manifest V3  
 
 ---
 ## Why this exists
