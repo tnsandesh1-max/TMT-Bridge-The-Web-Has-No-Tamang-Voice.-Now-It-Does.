@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TMT Bridge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f1a;
+      --bg2: #16162a;
+      --bg3: #1e1e35;
+      --border: rgba(255,255,255,0.08);
+      --accent: #a78bfa;
+      --accent2: #7c3aed;
+      --text: #f1f5f9;
+      --text2: rgba(255,255,255,0.55);
+      --text3: rgba(255,255,255,0.28);
+      --success: #34d399;
+      --danger: #f87171;
+      --warn: #fbbf24;
+    }
+
+    body {
+      width: 360px;
+      min-height: 480px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-size: 13px;
+      overflow-x: hidden;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, #1a1040 0%, #0f0f1a 100%);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .logo-icon {
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .logo-text {
+      font-size: 15px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #a78bfa, #e879f9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.01em;
+    }
+    .logo-sub {
+      font-size: 9px;
+      color: var(--text3);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .tab-bar {
+      display: flex;
+      gap: 2px;
+      background: var(--bg3);
+      border-radius: 8px;
+      padding: 2px;
+    }
+    .tab {
+      background: transparent;
+      border: none;
+      color: var(--text2);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .tab.active {
+      background: var(--accent2);
+      color: #fff;
+    }
+
+    /* ── Pages ── */
+    .page { display: none; padding: 14px 16px; }
+    .page.active { display: block; }
+
+    /* ── Translate tab ── */
+    .lang-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .lang-select {
+      flex: 1;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: 26px;
+    }
+    .lang-select:focus { border-color: var(--accent); }
+
+    .swap-btn {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .swap-btn:hover { background: var(--bg3); border-color: var(--accent); color: var(--accent); }
+
+    .input-area {
+      position: relative;
+      margin-bottom: 10px;
+    }
+    #input-text {
+      width: 100%;
+      min-height: 90px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', sans-serif;
+      padding: 10px 12px;
+      resize: vertical;
+      outline: none;
+      line-height: 1.6;
+      transition: border-color 0.15s;
+    }
+    #input-text:focus { border-color: var(--accent); }
+    #input-text::placeholder { color: var(--text3); }
+
+    .char-count {
+      position: absolute;
+      bottom: 8px;
+      right: 10px;
+      font-size: 10px;
+      color: var(--text3);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 7px;
+      margin-bottom: 12px;
+    }
+    .btn-primary {
+      flex: 1;
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      border: none;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      padding: 9px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.01em;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    .btn-secondary {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-size: 12px;
+      font-weight: 500;
+      font-family: inherit;
+      padding: 9px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-secondary.active {
+      background: rgba(167,139,250,0.12);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .output-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      min-height: 80px;
+      position: relative;
+    }
+    .output-placeholder {
+      color: var(--text3);
+      font-style: italic;
+      font-size: 12px;
+    }
+    #output-text {
+      color: var(--text);
+      font-family: 'Noto Sans Devanagari', 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.7;
+      display: none;
+      word-break: break-word;
+    }
+    .output-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      justify-content: flex-end;
+    }
+    .icon-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text2);
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Confidence bar */
+    .conf-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      display: none;
+    }
+    .conf-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+    .conf-bar-outer { flex: 1; height: 4px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; }
+    .conf-bar-inner { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+    .conf-pct { font-size: 10px; color: var(--text2); min-width: 28px; text-align: right; }
+
+    /* Loading state */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(167,139,250,0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+      margin: auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Page translate row ── */
+    .page-translate-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-top: 10px;
+    }
+    .page-translate-info { display: flex; flex-direction: column; gap: 1px; }
+    .page-translate-title { font-size: 12px; font-weight: 600; }
+    .page-translate-sub { font-size: 10px; color: var(--text3); }
+    .toggle-switch {
+      position: relative;
+      width: 38px;
+      height: 20px;
+    }
+    .toggle-switch input { display: none; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 14px;
+      height: 14px;
+      background: var(--text2);
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+      pointer-events: none;
+    }
+    .toggle-switch input:checked ~ .toggle-track { background: var(--accent2); border-color: var(--accent2); }
+    .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(18px); background: #fff; }
+
+    /* ── Settings tab ── */
+    .settings-section { margin-bottom: 18px; }
+    .settings-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text3);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 5px;
+    }
+    .settings-row-info { display: flex; flex-direction: column; gap: 2px; }
+    .settings-row-title { font-size: 12px; font-weight: 500; }
+    .settings-row-sub { font-size: 10px; color: var(--text3); }
+
+    .api-key-input {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+      letter-spacing: 0.03em;
+    }
+    .api-key-input:focus { border-color: var(--accent); }
+
+    .save-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      border: none;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      padding: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.15s;
+    }
+    .save-btn:hover { opacity: 0.88; }
+
+    .status-msg {
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      margin-top: 7px;
+      display: none;
+    }
+    .status-msg.success { background: rgba(52,211,153,0.1); color: var(--success); border: 1px solid rgba(52,211,153,0.2); }
+    .status-msg.error { background: rgba(248,113,113,0.1); color: var(--danger); border: 1px solid rgba(248,113,113,0.2); }
+
+    /* ── Stats tab ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .stat-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #a78bfa, #e879f9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-label {
+      font-size: 10px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .export-btn {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-size: 12px;
+      font-family: inherit;
+      padding: 9px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .export-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .research-note {
+      background: rgba(167,139,250,0.07);
+      border: 1px solid rgba(167,139,250,0.15);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+    .research-note strong { color: var(--accent); }
+
+    /* Toast */
+    #tmt-toast {
+      position: fixed;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 11px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      opacity: 0;
+      transition: all 0.25s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 9999;
+    }
+    #tmt-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Error state */
+    .error-text { color: var(--danger); font-size: 12px; }
+
+    /* Divider */
+    .divider { height: 1px; background: var(--border); margin: 12px 0; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">🌉</div>
+    <div>
+      <div class="logo-text">TMT Bridge</div>
+      <div class="logo-sub">Nepali · English · Tamang</div>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab active" data-tab="translate">Translate</button>
+    <button class="tab" data-tab="settings">Settings</button>
+    <button class="tab" data-tab="stats">Research</button>
+  </div>
+</div>
+
+<!-- ── Translate Page ── -->
+<div class="page active" id="page-translate">
+  <div class="lang-row">
+    <select class="lang-select" id="src-lang">
+      <option value="en">English</option>
+      <option value="ne">Nepali</option>
+      <option value="tmg">Tamang</option>
+    </select>
+    <button class="swap-btn" id="swap-btn" title="Swap languages">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+    </button>
+    <select class="lang-select" id="tgt-lang">
+      <option value="ne" selected>Nepali</option>
+      <option value="en">English</option>
+      <option value="tmg">Tamang</option>
+    </select>
+  </div>
+
+  <div class="input-area">
+    <textarea id="input-text" placeholder="Type or paste text to translate…" maxlength="500"></textarea>
+    <span class="char-count"><span id="char-num">0</span>/500</span>
+  </div>
+
+  <div class="action-row">
+    <button class="btn-primary" id="translate-btn">
+      Translate
+    </button>
+    <button class="btn-secondary" id="tts-btn" title="Read aloud">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      TTS
+    </button>
+  </div>
+
+  <div class="output-box">
+    <div class="spinner" id="spinner"></div>
+    <div class="output-placeholder" id="output-placeholder">Translation will appear here…</div>
+    <div id="output-text"></div>
+    <div class="output-actions" id="output-actions" style="display:none">
+      <button class="icon-btn" id="copy-btn" title="Copy">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
+      <button class="icon-btn" id="speak-btn" title="Speak translation">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
+      <button class="icon-btn" id="flag-btn" title="Report error">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="conf-row" id="conf-row">
+    <span class="conf-label">Confidence</span>
+    <div class="conf-bar-outer"><div class="conf-bar-inner" id="conf-fill"></div></div>
+    <span class="conf-pct" id="conf-pct">—</span>
+  </div>
+
+  <div class="page-translate-row">
+    <div class="page-translate-info">
+      <div class="page-translate-title">Translate Full Page</div>
+      <div class="page-translate-sub">Inline bilingual mode</div>
+    </div>
+    <label class="toggle-switch">
+      <input type="checkbox" id="page-toggle" />
+      <div class="toggle-track"></div>
+      <div class="toggle-thumb"></div>
+    </label>
+  </div>
+
+  <!-- Error report inline -->
+  <div id="error-report-box" style="display:none; margin-top:10px; background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:12px;">
+    <div style="font-size:12px; font-weight:600; margin-bottom:8px;">Report translation error</div>
+    <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px;" id="popup-err-types">
+      <button class="tmt-err-type" data-type="wrong_meaning">Wrong meaning</button>
+      <button class="tmt-err-type" data-type="missing_words">Missing words</button>
+      <button class="tmt-err-type" data-type="wrong_script">Wrong script</button>
+      <button class="tmt-err-type" data-type="unnatural">Unnatural</button>
+      <button class="tmt-err-type" data-type="other">Other</button>
+    </div>
+    <textarea id="popup-err-note" placeholder="Optional note..." rows="2" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;padding:6px 8px;font-family:inherit;resize:none;outline:none;"></textarea>
+    <div style="display:flex;gap:6px;margin-top:6px">
+      <button class="btn-primary" id="submit-report-btn" style="font-size:11px;padding:6px 12px;">Submit</button>
+      <button class="btn-secondary" id="cancel-report-btn" style="font-size:11px;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Settings Page ── -->
+<div class="page" id="page-settings">
+  <div class="settings-section">
+    <div class="settings-label">TTS Server Status</div>
+    <div class="settings-row">
+      <div class="settings-row-info">
+        <div class="settings-row-title">Local TTS Server</div>
+        <div class="settings-row-sub" id="tts-server-sub">Checking…</div>
+      </div>
+      <div id="tts-server-dot" style="width:10px;height:10px;border-radius:50%;background:#555;flex-shrink:0;margin-left:8px"></div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:6px;line-height:1.6;padding:0 2px">
+      Run <code style="background:var(--bg3);padding:1px 5px;border-radius:3px;color:var(--accent)">python tts_server.py</code> for native Nepali voice (Google ne-NP → ElevenLabs → gTTS). Extension falls back to gTTS automatically.
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-label">Default Languages</div>
+    <div class="settings-row">
+      <div class="settings-row-info">
+        <div class="settings-row-title">Source Language</div>
+        <div class="settings-row-sub">Language of the original text</div>
+      </div>
+      <select class="lang-select" id="default-src" style="width:110px">
+        <option value="en">English</option>
+        <option value="ne">Nepali</option>
+        <option value="tmg">Tamang</option>
+      </select>
+    </div>
+    <div class="settings-row">
+      <div class="settings-row-info">
+        <div class="settings-row-title">Target Language</div>
+        <div class="settings-row-sub">Language to translate into</div>
+      </div>
+      <select class="lang-select" id="default-tgt" style="width:110px">
+        <option value="ne" selected>Nepali</option>
+        <option value="en">English</option>
+        <option value="tmg">Tamang</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-label">Features</div>
+    <div class="settings-row">
+      <div class="settings-row-info">
+        <div class="settings-row-title">Auto TTS on hover</div>
+        <div class="settings-row-sub">Read translation aloud automatically</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="tts-toggle" />
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+    </div>
+    <div class="settings-row">
+      <div class="settings-row-info">
+        <div class="settings-row-title">Confidence scoring</div>
+        <div class="settings-row-sub">Show back-translation quality score</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="confidence-toggle" checked />
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+    </div>
+  </div>
+
+  <button class="save-btn" id="save-settings-btn">Save Settings</button>
+  <div class="status-msg" id="settings-status"></div>
+</div>
+
+<!-- ── Research / Stats Page ── -->
+<div class="page" id="page-stats">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="stat-total">—</div>
+      <div class="stat-label">Total Translations</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-success">—</div>
+      <div class="stat-label">Successful</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-reports">—</div>
+      <div class="stat-label">Error Reports</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-confidence">—</div>
+      <div class="stat-label">Avg Confidence</div>
+    </div>
+  </div>
+
+  <button class="export-btn" id="export-btn">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Export Research Dataset (JSON)
+  </button>
+
+  <div class="research-note">
+    <strong>Research contribution:</strong> Every translation you make and every error you flag helps build a dataset for English↔Tamang NLP research — one of the world's most under-resourced language pairs. Your data may contribute to future model improvements.
+  </div>
+</div>
+
+<div id="tmt-toast"></div>
+
+<script src="popup.js"></script>
+</body>
+</html>
