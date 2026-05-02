@@ -21,6 +21,30 @@ let currentTranslation = "";
 let currentSrc = "en";
 let currentTgt = "ne";
 
+// ── Onboarding: block UI until API key is set ─────────────────────────────────
+// On every popup open, check chrome.storage.sync for the API key.
+// If missing → show the onboarding banner and disable the translate button.
+// If present  → hide the banner, enable everything, pre-fill the key input.
+function checkApiKeyOnStartup() {
+  chrome.storage.sync.get("apiKey", ({ apiKey }) => {
+    const banner = document.getElementById("no-key-banner");
+    if (!apiKey || !apiKey.trim()) {
+      // No key — show banner, disable translate
+      if (banner) banner.style.display = "flex";
+      translateBtn.disabled = true;
+      translateBtn.title = "Enter your TMT API key in Settings first";
+    } else {
+      // Key exists — hide banner, enable translate
+      if (banner) banner.style.display = "none";
+      translateBtn.disabled = false;
+      translateBtn.title = "";
+      // Pre-fill the key input in Settings tab so user can see/edit it
+      const keyInput = document.getElementById("api-key-input");
+      if (keyInput) keyInput.value = apiKey;
+    }
+  });
+}
+
 // ── Tabs ─────────────────────────────────────────────────────────────────────
 document.querySelectorAll(".tab").forEach(tab => {
   tab.addEventListener("click", () => {
@@ -29,7 +53,14 @@ document.querySelectorAll(".tab").forEach(tab => {
     tab.classList.add("active");
     document.getElementById(`page-${tab.dataset.tab}`).classList.add("active");
     if (tab.dataset.tab === "stats") loadStats();
-    if (tab.dataset.tab === "settings") checkTTSServer();
+    if (tab.dataset.tab === "settings") {
+      checkTTSServer();
+      // Pre-fill API key input whenever user opens Settings
+      chrome.storage.sync.get("apiKey", ({ apiKey }) => {
+        const keyInput = document.getElementById("api-key-input");
+        if (keyInput && apiKey) keyInput.value = apiKey;
+      });
+    }
   });
 });
 
@@ -53,7 +84,6 @@ document.getElementById("swap-btn").addEventListener("click", () => {
   const tmp = srcLangEl.value;
   srcLangEl.value = tgtLangEl.value;
   tgtLangEl.value = tmp;
-  // Also swap input/output text if available
   if (currentTranslation) {
     const prevInput = inputEl.value;
     inputEl.value = currentTranslation;
@@ -72,7 +102,6 @@ function syncLangs() {
 
 srcLangEl.addEventListener("change", () => {
   if (srcLangEl.value === tgtLangEl.value) {
-    // Auto-pick a different target
     const others = ["en", "ne", "tmg"].filter(l => l !== srcLangEl.value);
     tgtLangEl.value = others[0];
   }
@@ -96,50 +125,63 @@ function doTranslate() {
   const text = inputEl.value.trim();
   if (!text) return;
 
-  const confidenceEnabled = document.getElementById("confidence-toggle").checked;
-
-  setLoading(true);
-  const sendTranslate = () => {
-    chrome.runtime.sendMessage({
-      type: "TRANSLATE",
-      text,
-      srcLang: srcLangEl.value,
-      tgtLang: tgtLangEl.value,
-      withConfidence: confidenceEnabled
-    }, (result) => {
-      if (chrome.runtime.lastError) {
-        // Background worker woke up — retry once
-        setTimeout(sendTranslate, 300);
-        return;
-      }
-      setLoading(false);
-    if (result?.success) {
-      currentTranslation = result.translation;
-      outputEl.textContent = result.translation;
-      outputEl.style.display = "block";
-      outputPlaceholder.style.display = "none";
-      outputActions.style.display = "flex";
-
-      // Confidence
-      if (result.confidence != null && confidenceEnabled) {
-        const pct = Math.round(result.confidence * 100);
-        const color = pct >= 75 ? "#34d399" : pct >= 50 ? "#fbbf24" : "#f87171";
-        confFill.style.width = `${pct}%`;
-        confFill.style.background = color;
-        confPct.textContent = `${pct}%`;
-        confRow.style.display = "flex";
-      } else {
-        confRow.style.display = "none";
-      }
-    } else {
-      outputEl.textContent = result?.error || "Translation failed";
-      outputEl.style.display = "block";
-      outputEl.className = "error-text";
-      outputPlaceholder.style.display = "none";
+  // Safety check — re-verify key exists before firing API call
+  chrome.storage.sync.get("apiKey", ({ apiKey }) => {
+    if (!apiKey || !apiKey.trim()) {
+      // Key was removed after startup — show banner again
+      const banner = document.getElementById("no-key-banner");
+      if (banner) banner.style.display = "flex";
+      translateBtn.disabled = true;
+      showToast("No API key — go to Settings");
+      return;
     }
-    });
-  };
-  sendTranslate();
+
+    const confidenceEnabled = document.getElementById("confidence-toggle").checked;
+    setLoading(true);
+
+    const sendTranslate = () => {
+      chrome.runtime.sendMessage({
+        type: "TRANSLATE",
+        text,
+        srcLang: srcLangEl.value,
+        tgtLang: tgtLangEl.value,
+        withConfidence: confidenceEnabled
+      }, (result) => {
+        if (chrome.runtime.lastError) {
+          // Background worker woke up — retry once
+          setTimeout(sendTranslate, 300);
+          return;
+        }
+        setLoading(false);
+        if (result?.success) {
+          currentTranslation = result.translation;
+          outputEl.textContent = result.translation;
+          outputEl.style.display = "block";
+          outputEl.className = "";
+          outputPlaceholder.style.display = "none";
+          outputActions.style.display = "flex";
+
+          // Confidence bar
+          if (result.confidence != null && confidenceEnabled) {
+            const pct = Math.round(result.confidence * 100);
+            const color = pct >= 75 ? "#34d399" : pct >= 50 ? "#fbbf24" : "#f87171";
+            confFill.style.width = `${pct}%`;
+            confFill.style.background = color;
+            confPct.textContent = `${pct}%`;
+            confRow.style.display = "flex";
+          } else {
+            confRow.style.display = "none";
+          }
+        } else {
+          outputEl.textContent = result?.error || "Translation failed";
+          outputEl.style.display = "block";
+          outputEl.className = "error-text";
+          outputPlaceholder.style.display = "none";
+        }
+      });
+    };
+    sendTranslate();
+  });
 }
 
 function setLoading(on) {
@@ -149,7 +191,6 @@ function setLoading(on) {
 }
 
 // ── TTS ───────────────────────────────────────────────────────────────────────
-// Routes through background.js → tts_server.py → gTTS → speechSynthesis
 document.getElementById("tts-btn").addEventListener("click", () => {
   const text = inputEl.value.trim();
   if (text) doSpeak(text, srcLangEl.value);
@@ -159,14 +200,9 @@ document.getElementById("speak-btn")?.addEventListener("click", () => {
 });
 
 function doSpeak(text, lang) {
-  // Ask background service worker to handle TTS
-  // Background will send PLAY_AUDIO_B64 or SPEAK_SYNTH to the active tab's content script
-  // For popup, we also handle audio directly here
   chrome.runtime.sendMessage({ type: "SPEAK", text, lang: lang.toLowerCase() }, (result) => {
     if (result?.provider) showToast(`🔊 ${result.provider}`);
   });
-
-  // Also try to play audio directly in popup context for immediate feedback
   _popupSpeak(text, lang);
 }
 
@@ -201,7 +237,7 @@ async function _popupSpeak(text, lang) {
     return;
   } catch (e) { /* blocked */ }
 
-  // 3. speechSynthesis (may not have ne-NP voice)
+  // 3. Browser speechSynthesis fallback
   if (window.speechSynthesis) {
     window.speechSynthesis.cancel();
     const bcp47map = { en: "en-US", eng: "en-US", ne: "ne-NP", nep: "ne-NP", tmg: "ne-NP", tamang: "ne-NP" };
@@ -269,7 +305,59 @@ pageToggle.addEventListener("change", () => {
   });
 });
 
-// ── Settings ──────────────────────────────────────────────────────────────────
+// ── Settings — API key ────────────────────────────────────────────────────────
+// Save button: validates format, saves to chrome.storage.sync,
+// hides the onboarding banner, and re-enables the translate button.
+document.getElementById("save-api-key-btn")?.addEventListener("click", () => {
+  const keyInput = document.getElementById("api-key-input");
+  const key = keyInput?.value.trim();
+
+  if (!key) {
+    showStatusMsg("api-key-status", "Please enter your TMT API key.", "error");
+    return;
+  }
+  if (!key.startsWith("team_")) {
+    showStatusMsg("api-key-status", "Key should start with team_", "error");
+    return;
+  }
+
+  chrome.storage.sync.set({ apiKey: key }, () => {
+    showStatusMsg("api-key-status", "API key saved!", "success");
+
+    // Hide onboarding banner and re-enable translate button
+    const banner = document.getElementById("no-key-banner");
+    if (banner) banner.style.display = "none";
+    translateBtn.disabled = false;
+    translateBtn.title = "";
+
+    // Notify background of updated key so active translations pick it up
+    chrome.runtime.sendMessage({ type: "SAVE_SETTINGS", settings: { apiKey: key } });
+  });
+});
+
+// Remove key button — clears from storage and shows onboarding again
+document.getElementById("remove-api-key-btn")?.addEventListener("click", () => {
+  chrome.storage.sync.remove("apiKey", () => {
+    const keyInput = document.getElementById("api-key-input");
+    if (keyInput) keyInput.value = "";
+    showStatusMsg("api-key-status", "API key removed.", "success");
+
+    // Re-show onboarding banner and disable translate
+    const banner = document.getElementById("no-key-banner");
+    if (banner) banner.style.display = "flex";
+    translateBtn.disabled = true;
+    translateBtn.title = "Enter your TMT API key in Settings first";
+  });
+});
+
+// Toggle show/hide the key value (password ↔ text)
+document.getElementById("toggle-key-visibility-btn")?.addEventListener("click", () => {
+  const keyInput = document.getElementById("api-key-input");
+  if (!keyInput) return;
+  keyInput.type = keyInput.type === "password" ? "text" : "password";
+});
+
+// ── Settings — other options ──────────────────────────────────────────────────
 document.getElementById("save-settings-btn").addEventListener("click", () => {
   const settings = {
     srcLang: document.getElementById("default-src").value,
@@ -318,6 +406,7 @@ function showToast(msg) {
 
 function showStatusMsg(id, msg, type) {
   const el = document.getElementById(id);
+  if (!el) return;
   el.textContent = msg;
   el.className = `status-msg ${type}`;
   el.style.display = "block";
@@ -353,5 +442,6 @@ async function checkTTSServer() {
   }
 }
 
-// Check TTS server on open
+// ── Init ──────────────────────────────────────────────────────────────────────
 checkTTSServer();
+checkApiKeyOnStartup();
