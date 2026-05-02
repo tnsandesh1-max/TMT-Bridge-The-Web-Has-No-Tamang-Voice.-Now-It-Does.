@@ -500,6 +500,28 @@
 
 <!-- ── Translate Page ── -->
 <div class="page active" id="page-translate">
+
+  <!-- No-key onboarding banner — hidden once key is saved -->
+  <div id="no-key-banner" style="display:none; align-items:flex-start; gap:10px;
+    background:#1e1133; border:1px solid #7c3aed55; border-radius:10px;
+    padding:12px 14px; margin-bottom:12px; font-size:12px; line-height:1.6; color:#c4b5fd">
+    <span style="font-size:18px; flex-shrink:0">🔑</span>
+    <div>
+      <div style="font-weight:600; color:#a78bfa; margin-bottom:3px">API key required</div>
+      <div style="color:#a89fc4">Go to <strong style="color:#c4b5fd">Settings</strong> and enter your TMT team key to start translating.</div>
+      <button onclick="
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelector('[data-tab=settings]').classList.add('active');
+        document.getElementById('page-settings').classList.add('active');
+        setTimeout(() => document.getElementById('api-key-input')?.focus(), 50);
+      " style="margin-top:8px; background:#7c3aed; color:#fff; border:none;
+        border-radius:6px; padding:5px 12px; font-size:11px; cursor:pointer">
+        Go to Settings →
+      </button>
+    </div>
+  </div>
+
   <div class="lang-row">
     <select class="lang-select" id="src-lang">
       <option value="en">English</option>
@@ -586,6 +608,45 @@
 
 <!-- ── Settings Page ── -->
 <div class="page" id="page-settings">
+
+  <!-- API Key -->
+  <div class="settings-section">
+    <div class="settings-label">TMT API Key</div>
+    <div style="position:relative; display:flex; gap:6px; align-items:center">
+      <input
+        class="api-key-input"
+        type="password"
+        id="api-key-input"
+        placeholder="team_xxxxxxxxxxxxxxxx"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button id="toggle-key-visibility-btn" title="Show / hide key"
+        style="flex-shrink:0; background:none; border:1px solid var(--border);
+               border-radius:6px; color:var(--text2); padding:6px 9px;
+               cursor:pointer; font-size:13px; line-height:1">
+        👁
+      </button>
+    </div>
+    <div style="display:flex; gap:6px; margin-top:8px">
+      <button class="save-btn" id="save-api-key-btn"
+        style="flex:1; padding:8px; font-size:12px">
+        Save Key
+      </button>
+      <button id="remove-api-key-btn" title="Clear saved key"
+        style="flex-shrink:0; background:none; border:1px solid #f87171;
+               border-radius:8px; color:#f87171; padding:8px 12px;
+               font-size:11px; cursor:pointer">
+        Remove
+      </button>
+    </div>
+    <div class="status-msg" id="api-key-status" style="display:none"></div>
+    <div style="font-size:10px; color:var(--text3); margin-top:6px; line-height:1.6; padding:0 2px">
+      Stored in <code style="background:var(--bg3); padding:1px 4px; border-radius:3px">chrome.storage.sync</code>
+      — never sent anywhere except the TMT API.
+    </div>
+  </div>
+
   <div class="settings-section">
     <div class="settings-label">TTS Server Status</div>
     <div class="settings-row">
