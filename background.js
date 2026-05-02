@@ -159,6 +159,7 @@ function confidenceScore(original, backTranslated) {
 // ── Core translation function ────────────────────────────────────────────────
 async function translate(text, srcLang, tgtLang, apiKey, withConfidence = false) {
   if (!text || !text.trim()) return { success: false, error: "Empty text" };
+  if (!apiKey || !apiKey.trim()) return { success: false, error: "API key not set. Please configure in extension settings." };
 
   const ck = cacheKey(text, srcLang, tgtLang);
   if (translationCache.has(ck)) {
@@ -166,14 +167,18 @@ async function translate(text, srcLang, tgtLang, apiKey, withConfidence = false)
   }
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout
     const resp = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`
       },
-      body: JSON.stringify({ text: text.trim(), src_lang: srcLang, tgt_lang: tgtLang })
+      body: JSON.stringify({ text: text.trim(), src_lang: srcLang, tgt_lang: tgtLang }),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
 
     const data = await resp.json();
 
@@ -183,20 +188,25 @@ async function translate(text, srcLang, tgtLang, apiKey, withConfidence = false)
       // Back-translation confidence scoring
       if (withConfidence && data.output) {
         try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5-second timeout
           const backResp = await fetch(API_URL, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               "Authorization": `Bearer ${apiKey}`
             },
-            body: JSON.stringify({ text: data.output, src_lang: tgtLang, tgt_lang: srcLang })
+            body: JSON.stringify({ text: data.output, src_lang: tgtLang, tgt_lang: srcLang }),
+            signal: controller.signal
           });
+          clearTimeout(timeoutId);
           const backData = await backResp.json();
           if (backData.message_type === "SUCCESS") {
             confidence = confidenceScore(text, backData.output);
           }
         } catch (e) {
-          // Back-translation failed silently
+          // Back-translation failed silently (timeout or network error)
+          console.log("Back-translation failed:", e.message);
         }
       }
 
@@ -211,17 +221,18 @@ async function translate(text, srcLang, tgtLang, apiKey, withConfidence = false)
       };
 
       translationCache.set(ck, result);
-      await logTranslationEvent({ type: "success", text, srcLang, tgtLang, confidence });
+      logTranslationEvent({ type: "success", text, srcLang, tgtLang, confidence }); // fire-and-forget
       return result;
 
     } else {
-      await logTranslationEvent({ type: "failure", text, srcLang, tgtLang, error: data.message });
+      logTranslationEvent({ type: "failure", text, srcLang, tgtLang, error: data.message }); // fire-and-forget
       return { success: false, error: data.message || "Translation failed" };
     }
 
   } catch (err) {
-    await logTranslationEvent({ type: "network_error", text, srcLang, tgtLang, error: err.message });
-    return { success: false, error: "Network error. Check your connection." };
+    const errorMsg = err.name === 'AbortError' ? "Request timed out. The translation service may be unavailable." : "Network error. Check your connection.";
+    logTranslationEvent({ type: "network_error", text, srcLang, tgtLang, error: err.message }); // fire-and-forget
+    return { success: false, error: errorMsg };
   }
 }
 
@@ -324,24 +335,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       const { translationLog, errorReports } = await chrome.storage.local.get(["translationLog", "errorReports"]);
       sendResponse({ translationLog: translationLog || [], errorReports: errorReports || [] });
     }
-  })();
-  return true; // keep channel open for async
-});
 
-// ── TTS message handler (added separately for clarity) ───────────────────────
-// Intercept messages before the main listener closes
-const _origListener = chrome.runtime.onMessage._listeners?.[0];
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.type === "SPEAK") {
-    (async () => {
+    else if (msg.type === "SPEAK") {
       const tabId = sender?.tab?.id || null;
       const result = await speakViaTTS(msg.text, msg.lang, tabId);
       sendResponse(result);
-    })();
-    return true;
-  }
-  if (msg.type === "CHECK_TTS_SERVER") {
-    (async () => {
+    }
+
+    else if (msg.type === "CHECK_TTS_SERVER") {
       try {
         const resp = await fetch("http://localhost:7799/health");
         const data = await resp.json();
@@ -349,7 +350,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       } catch (e) {
         sendResponse({ available: false });
       }
-    })();
-    return true;
-  }
+    }
+  })();
+  return true; // keep channel open for async
 });

@@ -69,7 +69,7 @@ chrome.storage.local.get(["srcLang", "tgtLang", "ttsEnabled", "confidenceEnabled
   if (res.srcLang) { srcLangEl.value = res.srcLang; document.getElementById("default-src").value = res.srcLang; }
   if (res.tgtLang) { tgtLangEl.value = res.tgtLang; document.getElementById("default-tgt").value = res.tgtLang; }
   if (res.ttsEnabled) document.getElementById("tts-toggle").checked = res.ttsEnabled;
-  if (res.confidenceEnabled !== false) document.getElementById("confidence-toggle").checked = true;
+  if (res.confidenceEnabled === true) document.getElementById("confidence-toggle").checked = true;
   currentSrc = srcLangEl.value;
   currentTgt = tgtLangEl.value;
 });
@@ -200,9 +200,6 @@ document.getElementById("speak-btn")?.addEventListener("click", () => {
 });
 
 function doSpeak(text, lang) {
-  chrome.runtime.sendMessage({ type: "SPEAK", text, lang: lang.toLowerCase() }, (result) => {
-    if (result?.provider) showToast(`🔊 ${result.provider}`);
-  });
   _popupSpeak(text, lang);
 }
 

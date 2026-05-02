@@ -153,18 +153,19 @@
     });
   }
 
-  function positionTooltip(x, y) {
+  function positionTooltip(clientX, clientY) {
     if (!tooltip) return;
     tooltip.style.display = "block";
     const tw = tooltip.offsetWidth || 300;
     const th = tooltip.offsetHeight || 160;
     const vw = window.innerWidth, vh = window.innerHeight;
-    let left = x + 10;
-    let top = y + 10;
-    if (left + tw > vw - 10) left = x - tw - 10;
-    if (top + th > vh - 10) top = y - th - 10;
-    tooltip.style.left = `${Math.max(6, left)}px`;
-    tooltip.style.top = `${Math.max(6, top)}px`;
+    let left = clientX + 10;
+    let top = clientY + 10;
+    if (left + tw > vw - 10) left = clientX - tw - 10;
+    if (top + th > vh - 10) top = clientY - th - 10;
+    // Convert viewport coords to page coords for absolute positioning
+    tooltip.style.left = `${Math.max(6, left + window.scrollX)}px`;
+    tooltip.style.top = `${Math.max(6, top + window.scrollY)}px`;
   }
 
   function hideTooltip() {
@@ -210,7 +211,7 @@
     const langLabel = `${settings.srcLang.toUpperCase()} → ${settings.tgtLang.toUpperCase()}`;
     tooltip.querySelector("#tmt-lang-badge").textContent = langLabel;
 
-    positionTooltip(e.pageX, e.pageY);
+    positionTooltip(e.clientX, e.clientY);
 
     // Check glossary first
     const glossaryHit = checkGlossary(selected, settings.tgtLang);
@@ -225,13 +226,25 @@
     }
 
     const doTranslate = (retried) => {
+    // Use a timeout so the spinner never hangs forever
+    const timeoutGuard = setTimeout(() => {
+      if (tooltip.querySelector("#tmt-loading").style.display !== "none") {
+        tooltip.querySelector("#tmt-loading").style.display = "none";
+        const el = tooltip.querySelector("#tmt-translation");
+        el.textContent = "Translation timed out. Please try again.";
+        el.style.display = "block";
+        el.style.color = "#ef4444";
+      }
+    }, 12000);
+
     chrome.runtime.sendMessage({
       type: "TRANSLATE",
       text: selected,
       srcLang: settings.srcLang,
       tgtLang: settings.tgtLang,
-      withConfidence: true
+      withConfidence: false  // disabled on hover — avoids 2nd back-translation API call
     }, (result) => {
+      clearTimeout(timeoutGuard);
       if (chrome.runtime.lastError) {
         if (!retried) { setTimeout(() => doTranslate(true), 300); return; }
         tooltip.querySelector("#tmt-loading").style.display = "none";
@@ -246,6 +259,7 @@
         const el = tooltip.querySelector("#tmt-translation");
         el.textContent = result.translation;
         el.style.display = "block";
+        el.style.color = "";
         renderConfidence(result.confidence);
         if (settings.ttsEnabled) speakText(result.translation, settings.tgtLang);
       } else {
@@ -425,8 +439,10 @@
       settings = { ...settings, ...msg.settings };
     }
     if (msg.type === "TRANSLATE_PAGE_CMD") {
-      translatePageBilingual(msg.srcLang, msg.tgtLang);
-      sendResponse({ ok: true });
+      translatePageBilingual(msg.srcLang, msg.tgtLang).then(() => {
+        sendResponse({ ok: true });
+      });
+      return true;
     }
     if (msg.type === "TRANSLATE_SELECTION") {
       const selection = window.getSelection();
@@ -438,8 +454,8 @@
       tooltip.querySelector("#tmt-translation").style.display = "none";
       tooltip.querySelector("#tmt-error-panel").style.display = "none";
       positionTooltip(
-        rect ? rect.left + window.scrollX : window.innerWidth / 2,
-        rect ? rect.bottom + window.scrollY : window.innerHeight / 2
+        rect ? rect.left : window.innerWidth / 2,
+        rect ? rect.bottom : window.innerHeight / 2
       );
       chrome.runtime.sendMessage({
         type: "TRANSLATE",
