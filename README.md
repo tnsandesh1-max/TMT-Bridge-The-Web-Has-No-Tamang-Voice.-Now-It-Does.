@@ -2,6 +2,8 @@
 
 > Real-time translation across all 6 language directions, built for the web — with TTS readback, confidence scoring, and a research-grade error dataset.
 
+🎥 Demo Video: [Watch ParsePilot Demo](https://drive.google.com/file/d/1iCwXR20UIeG9FU4e0d3MIr7jwq-lflk6/view?usp=sharing)
+
 **Built for the Google TMT Hackathon 2026** · Chrome Extension · Manifest V3  
 
 ---
