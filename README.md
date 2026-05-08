@@ -227,10 +227,10 @@ tmt-extension/
 
 ## Security
 
-- API keys are stored in `chrome.storage.sync` — local to your browser, never committed to source control
-- The TTS server only accepts connections from `localhost`
-- No user data is sent to any third party beyond the TMT API and your configured TTS provider
-- See `.gitignore` — the `.env` file is excluded from version control
+- API keys are stored in `chrome.storage.sync` — local to your browser, never committed to source control.
+- The TTS server only accepts connections from `localhost`.
+- No user data is sent to any third party beyond the TMT API and your configured TTS provider.
+- See `.gitignore` — the `.env` file is excluded from version control.
 
 ---
 
